@@ -37,7 +37,7 @@ bool validate_instance(const xxor_instance_t *instance) {
     if (instance == NULL || instance->meta == NULL) { return false; }
     if (access(instance->file_name, F_OK) != 0) { return false; }
 
-    const uint64_t fpos = ftell(instance->file);
+    const uint32_t fpos = ftell(instance->file);
     fseek(instance->file, 0, SEEK_END);
     const uint64_t len = ftell(instance->file) - METADATA_SIZE;
     fseek(instance->file, fpos, SEEK_SET);
@@ -51,7 +51,12 @@ bool validate_instance(const xxor_instance_t *instance) {
 
 xxor_instance_t* unsafe_load_file(FILE *file, const char *path) {
     xxor_meta_t *meta = calloc(1, METADATA_SIZE);
-    memcpy(meta, file, sizeof(xxor_instance_t));
+    fseek(file, 0, SEEK_SET);
+    if (fread(meta, 1, METADATA_SIZE, file) != METADATA_SIZE) {
+        show_err("Failed to read file\n");
+        free(meta);
+        return NULL;
+    }
 
     xxor_instance_t *instance = calloc(1, sizeof(xxor_instance_t));
     instance->meta = meta;
@@ -68,7 +73,6 @@ bool key_is_exhausted(const xxor_instance_t *instance) {
 void free_xxor_key(xxor_instance_t *instance) {
     if (instance == NULL) { return; }
     free(instance->meta);
-    free(instance->file_name);
     fclose(instance->file);
     free(instance);
 }
