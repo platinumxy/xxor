@@ -24,8 +24,27 @@ int main(int argc, char *argv[]) {    const char *file_name = "../../testing/exa
     } else {
         printf("Failed to save the key\n");
     }
+    free(metadata);
+    free(otp_buffer);
 
     xxor_instance_t* instance = load_file(file_name);
     printf("Loaded the instance\n");
     print_xxor_key(instance);
+
+    for (int j = 0; j < 10; j++) {
+        uint8_t err;
+        uint8_t* buff = read_key_bytes(instance, 10, &err);
+        if (buff == NULL) {
+            printf("Failed to read key\n");
+            dbg_print_err_read_key_bytes(err);
+        } else {
+            for (int i = 0; i < 10; i++) {
+                printf("%02x ", buff[i]);
+            }
+            printf("\n");
+        }
+        free(buff);
+    }
+    print_xxor_key(instance);
+    free_xxor_key(instance);
 } 

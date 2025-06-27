@@ -49,7 +49,7 @@ bool validate_instance(const xxor_instance_t *instance) {
     return true;
 }
 
-xxor_instance_t* unsafe_load_file(FILE *file, const char *path) {
+xxor_instance_t *unsafe_load_file(FILE *file, char *path) {
     xxor_meta_t *meta = calloc(1, METADATA_SIZE);
     fseek(file, 0, SEEK_SET);
     if (fread(meta, 1, METADATA_SIZE, file) != METADATA_SIZE) {
@@ -77,18 +77,23 @@ void free_xxor_key(xxor_instance_t *instance) {
     free(instance);
 }
 
-char update_saved_xxor_key(xxor_instance_t *key) {
-    printf("TODO");
-    return 0;
+bool update_saved_xxor_key(const xxor_instance_t *instance) {
+    const uint32_t pos = ftell(instance->file);
+    fseek(instance->file, 0, SEEK_SET);
+    bool result = fwrite(instance->meta, 1, METADATA_SIZE, instance->file) == METADATA_SIZE;
+    fseek(instance->file, pos, SEEK_SET);
+    return result;
+
+
 }
 
 uint8_t* read_key_bytes(xxor_instance_t *instance, size_t len, uint8_t* err_code) {
-    if (!(instance && instance->file && instance->meta)) {
+    if (!validate_instance(instance)) {
         *err_code = 1 << 0;
         return NULL;
     }
 
-    if (len + instance->meta->used_key_cnt  > instance->meta->key_size) {
+    if (len + instance->meta->used_key_cnt > instance->meta->key_size) {
         *err_code = 1 << 1;
         return NULL;
     }
@@ -119,7 +124,7 @@ uint8_t* read_key_bytes(xxor_instance_t *instance, size_t len, uint8_t* err_code
 void dbg_print_err_read_key_bytes(uint32_t err_code) {
     switch (err_code) {
         case 1 << 0:
-            show_err("Invalid key structure or file.\n");
+            show_err("Issue with key data.\n");
             break;
         case 1 << 1:
             show_err("Requested amount exceeds key size.\n");
