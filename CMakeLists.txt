@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(xxor 
+project(xxor
     VERSION 0.0.1
     DESCRIPTION "OTP-based messaging app"
     LANGUAGES C)
@@ -21,6 +21,7 @@ set(SOURCES
     src/main.c
     src/key_management.c
     src/debugging.c
+    src/network_manager.c
 )
 
 set(HEADERS
@@ -28,6 +29,7 @@ set(HEADERS
     src/key_management.h
     src/debugging.h
     src/types.h
+    src/network_manager.h
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
