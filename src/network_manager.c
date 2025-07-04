@@ -8,6 +8,9 @@
 #include <unistd.h>
 
 #include "network_manager.h"
+
+#include <sys/ioctl.h>
+
 #include "debugging.h"
 
 
@@ -30,6 +33,17 @@ net_conn_conf_t get_default_net_conf() {
     con.timeout = DEFAULT_TIMEOUT;
     return con;
 }
+
+int get_available_bytes(int sockfd) {
+    int cnt;
+    if (ioctl(sockfd, FIONREAD, &cnt) == -1) {
+        show_err("Unable to read bytes available on the stream");
+        return -1;
+    }
+    return cnt;
+}
+
+/// =========== server management ===============
 
 bool init_server(net_server_instance_t *server, const net_conn_conf_t *conf) {
     if (!conf || !conf->server_binding_ip) {
@@ -114,4 +128,53 @@ bool server_accept_connection(network_conn_t *conn) {
     }
     server->conn_established = true;
     return true;
+}
+
+/// =========== client management ===============
+
+network_conn_t *connect_to_server(const net_conn_conf_t *conf, const char *server_ip, int server_port) {
+    net_client_instance_t *client = calloc(1, sizeof(net_client_instance_t));
+    if (server_ip == NULL) {
+        show_err("Unable to allocate memory for client instance\n");
+        return NULL;
+    }
+
+    client->server_port = server_port;
+    client->server_ip = server_ip;
+    client->conf.server_port = server_port;
+    client->conf.server_binding_ip = strdup(server_ip);
+    client->conf.timeout = conf->timeout;
+
+    client->sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (client->sockfd < 0) {
+        show_err("Failed to create server socket\n");
+        free(client->server_ip);
+        free(client);
+        return NULL;
+    }
+    memset(&client->addr, 0, sizeof(client->addr));
+
+    client->addr.sin_family = AF_INET;
+    client->addr.sin_port = htons(client->conf.server_port);
+    client->addr.sin_addr.s_addr = inet_addr(server_ip);
+
+
+    if (connect(client->sockfd, (struct sockaddr *) &client->addr, sizeof(client->addr)) != 0) {
+        show_err("Failed to connect to server\n");
+        free(client->server_ip);
+        free(client);
+        return NULL;
+    }
+
+    network_conn_t *conn = calloc(1, sizeof(network_conn_t));
+    if (conn == NULL) {
+        show_err("Unable to allocate memory for connection instance\n");
+        free(client->server_ip);
+        free(client);
+        return NULL;
+    }
+
+    conn->conn_type = CLIENT_CONNECTION;
+    conn->instance = (void *) client;
+    return conn;
 }

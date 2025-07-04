@@ -58,7 +58,7 @@ void test_keys() {
     free_xxor_key(instance);
 }
 
-void test_net() {
+void test_net_server() {
     const net_conn_conf_t config = get_default_net_conf();
     network_conn_t *conn = start_server(&config);
 
@@ -66,6 +66,7 @@ void test_net() {
         printf("Failed to start server\n");
         return;
     }
+    printf("Server started, waiting for connection\n");
 
     if (server_accept_connection(conn)) {
         printf("Accepted connection\n");
@@ -73,18 +74,47 @@ void test_net() {
         printf("Failed to accept connection\n");
     }
 
+    printf("Sending 0x41 0x64 times\n");
     char buff = 0x41;
     for (int i = 0; i < 100; i++) {
         write(((NET_SRVR_T) conn->instance)->connfd, &buff, 1);
     }
+
+    printf("Sent all receiving 0x64 bytes\n");
+
+
     for (int i = 0; i < 100; i++) {
         recv(((NET_SRVR_T) conn->instance)->connfd, &buff, 1, 0);
-        printf("%c", buff);
+        printf("%02x ", buff);
     }
+    printf("\n");
 
-    printf("Connection closed");
+    printf("Connection closed\n");
+}
+
+void test_net_client() {
+    const net_conn_conf_t config = get_default_net_conf();
+    network_conn_t *conn = connect_to_server(&config, "127.0.0.1", 12321);
+    printf("connected to server, recv 0x64 bytes\n");
+
+    char buff;
+    for (int i = 0; i < 100; i++) {
+        recv(((NET_CLNT_T) conn->instance)->sockfd, &buff, 1, 0);
+        printf("%02x ", buff);
+    }
+    printf("\n");
+    printf("Received all now sending 0x43 0x64 times\n");
+    buff = 0x43;
+    for (int i = 0; i < 100; i++) {
+        write(((NET_CLNT_T) conn->instance)->sockfd, &buff, 1);
+    }
+    printf("now done\n");
 }
 
 int main(int argc, char *argv[]) {
-    test_net();
+    if (argc == 1) {
+        test_net_server();
+    } else {
+        test_net_client();
+    }
 }

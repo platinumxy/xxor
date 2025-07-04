@@ -24,6 +24,11 @@ typedef struct net_server_instance {
 #define NET_SRVR_T net_server_instance_t*
 
 typedef struct net_client_instance {
+    net_conn_conf_t conf;
+    int sockfd;
+    struct sockaddr_in addr;
+    int status;
+
     const char *server_ip;
     int server_port;
 } net_client_instance_t;
@@ -38,9 +43,16 @@ typedef struct network_conn {
 #define CLIENT_CONNECTION 0
 #define SERVER_CONNECTION 1
 
-
 net_conn_conf_t get_default_net_conf();
+
+int get_available_bytes(int sockfd);
+
+/// =========== server management ===============
 
 network_conn_t *start_server(const net_conn_conf_t *conf);
 
 bool server_accept_connection(network_conn_t *conn);
+
+/// =========== client management ===============
+
+network_conn_t *connect_to_server(const net_conn_conf_t *conf, const char *server_ip, int server_port);
