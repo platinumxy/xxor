@@ -22,7 +22,7 @@ void print_xxor_key(xxor_instance_t *key) {
 
     show_err("XXOR Key Metadata:\n");
     show_err("  Version: %d\n", key->meta->version);
-    show_err("  Key Size: %lu bytes\n", (uint64_t)key->meta->key_size);
-    show_err("  Used Key Count: %lu\n", (uint64_t)key->meta->used_key_cnt);
+    show_err("  Key Size: %lu bytes\n", (uint64_t) key->meta->key_size);
+    show_err("  Used Key Count: %lu\n", (uint64_t) key->meta->used_key_cnt);
     show_err("  File Name: %s\n", key->file_name);
 }

@@ -15,6 +15,7 @@ typedef struct xxor_meta {
     uint64_t key_size;
     uint64_t used_key_cnt;
 } xxor_meta_t;
+
 #define METADATA_SIZE (sizeof(xxor_meta_t))
 
 #pragma pack(pop)
@@ -27,4 +28,4 @@ typedef struct xxor_instance {
 } xxor_instance_t;
 
 
-typedef bool (*fill_rand_buff_fn)(size_t, uint8_t*);
+typedef bool (*fill_rand_buff_fn)(size_t, uint8_t *);

@@ -25,13 +25,13 @@
 
 net_conn_conf_t get_default_net_conf() {
     net_conn_conf_t con;
-    con .server_port = DEFAULT_SERVER_PORT;
+    con.server_port = DEFAULT_SERVER_PORT;
     con.server_binding_ip = DEFAULT_BINDING_ADDRESS;
     con.timeout = DEFAULT_TIMEOUT;
     return con;
 }
 
-bool init_server(net_server_instance_t* server, const net_conn_conf_t* conf) {
+bool init_server(net_server_instance_t *server, const net_conn_conf_t *conf) {
     if (!conf || !conf->server_binding_ip) {
         show_err("Invalid server configuration\n");
         return false;
@@ -58,40 +58,39 @@ bool init_server(net_server_instance_t* server, const net_conn_conf_t* conf) {
     server->conn_established = false;
     server->connfd = 0;
 
-    if (bind(server->sockfd, (struct sockaddr*)&server->addr, sizeof(server->addr)) < 0) {
+    if (bind(server->sockfd, (struct sockaddr *) &server->addr, sizeof(server->addr)) < 0) {
         show_err("Failed to bind server socket\n");
         close(server->sockfd);
-        free((void*)server->conf.server_binding_ip);
+        free((void *) server->conf.server_binding_ip);
         return false;
     }
     return true;
 }
 
-network_conn_t* start_server(const net_conn_conf_t* conf) {
-    net_server_instance_t* server = calloc(1, sizeof(net_server_instance_t));
-    if  (server == NULL) {
+network_conn_t *start_server(const net_conn_conf_t *conf) {
+    net_server_instance_t *server = calloc(1, sizeof(net_server_instance_t));
+    if (server == NULL) {
         show_err("Unable to allocate memory for server instance\n");
         return NULL;
     }
 
-    network_conn_t* conn = calloc(1, sizeof(network_conn_t));
+    network_conn_t *conn = calloc(1, sizeof(network_conn_t));
     if (conn == NULL) {
         show_err("Unable to allocate memory for connection instance\n");
         free(server);
         return NULL;
     }
     conn->conn_type = SERVER_CONNECTION;
-    conn->instance = (void*)server;
+    conn->instance = (void *) server;
     if (!init_server(server, conf)) {
         free(server);
         free(conn);
         return NULL;
     }
-     return conn;
-
+    return conn;
 }
 
-bool server_accept_connection(network_conn_t* conn) {
+bool server_accept_connection(network_conn_t *conn) {
     if (!(conn && conn->instance)) {
         show_err("Invalid connection instance\n");
         return false;
@@ -102,11 +101,12 @@ bool server_accept_connection(network_conn_t* conn) {
     }
 
     NET_SRVR_T server = conn->instance;
-    if ( listen(server->sockfd, 1) != 0) {  // backlog of only one as we only ever want client
+    if (listen(server->sockfd, 1) != 0) {
+        // backlog of only one as we only ever want client
         show_err("Server failed to listen on socket\n");
     }
-    socklen_t len = (socklen_t)sizeof(server->clnt);
-    server->connfd = accept(server->sockfd, (struct sockaddr*)&server->clnt, &len);
+    socklen_t len = (socklen_t) sizeof(server->clnt);
+    server->connfd = accept(server->sockfd, (struct sockaddr *) &server->clnt, &len);
 
     if (server->connfd < 0) {
         show_err("Server failed to accept connection\n");

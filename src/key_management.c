@@ -9,7 +9,7 @@
 #include "debugging.h"
 #include "types.h"
 
-xxor_instance_t* load_file(const char *path) {
+xxor_instance_t *load_file(const char *path) {
     FILE *file = fopen(path, "rb+");
     if (!file) {
         show_err("Failed to open file\n");
@@ -19,7 +19,7 @@ xxor_instance_t* load_file(const char *path) {
     fseek(file, 0, SEEK_END);
     uint64_t file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
-    if (file_size < sizeof(xxor_instance_t) + 1 ) {
+    if (file_size < sizeof(xxor_instance_t) + 1) {
         show_err("File is too small\n");
         return NULL;
     }
@@ -49,7 +49,7 @@ bool validate_instance(const xxor_instance_t *instance) {
     return true;
 }
 
-xxor_instance_t *unsafe_load_file(FILE *file, char *path) {
+xxor_instance_t *unsafe_load_file(FILE *file, const char *path) {
     xxor_meta_t *meta = calloc(1, METADATA_SIZE);
     fseek(file, 0, SEEK_SET);
     if (fread(meta, 1, METADATA_SIZE, file) != METADATA_SIZE) {
@@ -83,11 +83,9 @@ bool update_saved_xxor_key(const xxor_instance_t *instance) {
     bool result = fwrite(instance->meta, 1, METADATA_SIZE, instance->file) == METADATA_SIZE;
     fseek(instance->file, pos, SEEK_SET);
     return result;
-
-
 }
 
-uint8_t* read_key_bytes(xxor_instance_t *instance, size_t len, uint8_t* err_code) {
+uint8_t *read_key_bytes(xxor_instance_t *instance, size_t len, uint8_t *err_code) {
     if (!validate_instance(instance)) {
         *err_code = 1 << 0;
         return NULL;
@@ -143,8 +141,8 @@ void dbg_print_err_read_key_bytes(uint32_t err_code) {
     }
 }
 
-xxor_meta_t *gen_new_xxor_key(size_t len, uint8_t* buffer, fill_rand_buff_fn func) {
-    if (func == NULL || buffer == NULL) { return NULL;}
+xxor_meta_t *gen_new_xxor_key(size_t len, uint8_t *buffer, fill_rand_buff_fn func) {
+    if (func == NULL || buffer == NULL) { return NULL; }
     xxor_meta_t *meta = calloc(1, sizeof(xxor_meta_t));
 
     if (!func(len, buffer)) {
@@ -160,7 +158,7 @@ xxor_meta_t *gen_new_xxor_key(size_t len, uint8_t* buffer, fill_rand_buff_fn fun
     return meta;
 }
 
-bool save_new_xxor_key(const char* file_name, const uint8_t* buffer, const xxor_meta_t *meta) {
+bool save_new_xxor_key(const char *file_name, const uint8_t *buffer, const xxor_meta_t *meta) {
     FILE *file = fopen(file_name, "w+b");
     if (!file) { return false; }
 
