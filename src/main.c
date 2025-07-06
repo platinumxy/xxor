@@ -18,7 +18,7 @@ bool dev_rand_fill(const size_t len, uint8_t *buffer) {
     return true;
 }
 
-DECLARE_QUEUE_TYPE(int, int);
+DECLARE_QUEUE_TYPE(int, int)
 
 void CircularQueue_test() {
     CQueue(int) *q = queue_init(int);

@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <string.h> // ignore lsp used for memcpy
 
-#define QUEUE_SIZE 0xFF_FF
+#define QUEUE_SIZE 0xFFFF
 
 typedef struct {
     int head;

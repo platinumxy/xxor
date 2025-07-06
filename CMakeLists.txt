@@ -22,7 +22,6 @@ set(SOURCES
         src/key_management.c
         src/debugging.c
         src/network_manager.c
-        src/circular_queue.c
 )
 
 set(HEADERS
