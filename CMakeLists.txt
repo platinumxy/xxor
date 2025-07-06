@@ -17,23 +17,9 @@ set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
 
 include_directories(src)
 
-set(SOURCES
-        src/main.c
-        src/key_management.c
-        src/debugging.c
-        src/network_manager.c
-)
+file(GLOB SOURCES "src/*.c")
 
-set(HEADERS
-        src/main.h
-        src/key_management.h
-        src/debugging.h
-        src/types.h
-        src/network_manager.h
-        src/circular_queue.h
-        src/utils.h
-        src/promise.h
-)
+file(GLOB HEADERS "src/*.h")
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
