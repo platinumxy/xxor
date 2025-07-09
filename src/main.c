@@ -12,6 +12,7 @@
 #include "promise.h"
 #include "network_manager.h"
 #include "circular_queue.h"
+#include "debugging.h"
 
 bool dev_rand_fill(const size_t len, uint8_t *buffer) {
     getrandom(buffer, len, 0);
@@ -27,7 +28,6 @@ void CircularQueue_test() {
         i++;
     }
 
-
     while (queue_pop(int, q, &i)) {
         printf("%d ", i);
     }
@@ -41,7 +41,6 @@ void CircularQueue_test() {
         printf("%d ", i);
     }
 }
-
 
 void *promise_testing_resolve_later(void *args) {
     promise_t(int) *prms = (promise_t(int) *) args;
@@ -66,7 +65,23 @@ void promise_testing() {
     }
 }
 
+int main() {
+    bool is_server = !already_open();
+    net_conn_conf_t conf = get_default_net_conf();
+    network_interface_t *iface = init_network_interface(&conf, is_server);
+    if (iface == NULL) {
+        printf("Failed to initialize network interface\n");
+        return 1;
+    }
+    promise_t(u8_arr) *prms = new_promise(u8_arr);
+    prms->value = calloc(1, sizeof(u8_arr_t));
+    prms->value->size = 0xFF;
+    prms->value->data = calloc(0xFF, sizeof(uint8_t));
 
-int main(int argc, char *argv[]) {
-    promise_testing();
+    queue_push(u8_arr_promise, iface->send_queue, &prms);
+    if (await_promise(u8_arr, prms)) {
+        printf("SENT!");
+    } else {
+        printf("Failed to send");
+    }
 }

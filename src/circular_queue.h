@@ -1,6 +1,6 @@
 #pragma once
 #include <stdbool.h>
-#include <string.h> // ignore lsp used for memcpy
+#include <string.h> // ignore lsp needed to ensure memcpy exists for the functions
 
 #define QUEUE_SIZE 0xFFFF
 
@@ -15,17 +15,17 @@ typedef struct {
 #define queue_next_pos(pos) (((pos) + 1) % QUEUE_SIZE)
 
 #define DECLARE_QUEUE_TYPE(T, name) \
-typedef struct CircularQueue_##name {\
+typedef __attribute__((unused)) struct CircularQueue_##name {\
     queue_meta_t meta; \
     T data[QUEUE_SIZE]; \
 } CircularQueue_##name##_t; \
 \
-static CircularQueue_##name##_t* queue_##name##_init() {\
+static __attribute__((unused)) CircularQueue_##name##_t* queue_##name##_init() {\
      CircularQueue_##name##_t* q = calloc(1, sizeof(CircularQueue_##name##_t));\
      return q;\
 }\
 \
-static bool queue_##name##_push(CircularQueue_##name##_t *q, T *val) { \
+static __attribute__((unused)) bool queue_##name##_push(CircularQueue_##name##_t *q, T *val) { \
     if (queue_full(q)) {  return false; }\
     memcpy(&q->data[q->meta.tail], val, sizeof(T)); \
     q->meta.tail = (q->meta.tail + 1) % QUEUE_SIZE; \
@@ -33,15 +33,21 @@ static bool queue_##name##_push(CircularQueue_##name##_t *q, T *val) { \
     return true; \
 } \
 \
-static bool queue_##name##_pop(CircularQueue_##name##_t *q ,T *result) { \
+static __attribute__((unused)) bool queue_##name##_pop(CircularQueue_##name##_t *q ,T *result) { \
     if (queue_empty(q)) { return false; }\
     memcpy(result, &q->data[q->meta.head], sizeof(T)); \
     q->meta.head = (q->meta.head + 1) % QUEUE_SIZE; \
     q->meta.cnt -= 1; \
     return true; \
+}\
+static __attribute__((unused)) bool queue_##name##_peek(CircularQueue_##name##_t *q ,T *result) {\
+    if (queue_empty(q)) { return false; }\
+    memcpy(result, &q->data[q->meta.head], sizeof(T));\
+    return true;\
 }
 
 #define CQueue(name) CircularQueue_##name##_t
 #define queue_pop(name, q, result) queue_##name##_pop(q, result)
+#define queue_peek(name, q, result) queue_##name##_peek(q, result)
 #define queue_push(name, q, val) queue_##name##_push(q, val)
 #define queue_init(name) queue_##name##_init()

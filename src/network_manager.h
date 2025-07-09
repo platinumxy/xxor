@@ -3,9 +3,12 @@
 #include <stdbool.h>
 #include <netinet/in.h>
 
+#include "circular_queue.h"
+#include "promise.h"
+
 typedef struct net_conn_conf {
     int server_port;
-    const char *server_binding_ip;
+    const char *server_ip;
     int timeout;
 } net_conn_conf_t;
 
@@ -28,24 +31,23 @@ typedef struct net_client_instance {
     int sockfd;
     struct sockaddr_in addr;
     int status;
-
-    const char *server_ip;
-    int server_port;
 } net_client_instance_t;
 
 #define NET_CLNT_T net_client_instance_t*
 
+typedef enum network_connection_type {
+    SERVER,
+    CLIENT
+} network_connection_type_t;
+
 typedef struct network_conn {
-    char conn_type;
+    network_connection_type_t conn_type;
     void *instance;
 } network_conn_t;
 
-#define CLIENT_CONNECTION 0
-#define SERVER_CONNECTION 1
-
 net_conn_conf_t get_default_net_conf();
 
-int get_available_bytes(int sockfd);
+int get_available_bytes(const network_conn_t *conn);
 
 /// =========== server management ===============
 
@@ -55,4 +57,15 @@ bool server_accept_connection(network_conn_t *conn);
 
 /// =========== client management ===============
 
-network_conn_t *connect_to_server(const net_conn_conf_t *conf, const char *server_ip, int server_port);
+network_conn_t *connect_to_server(const net_conn_conf_t *conf);
+
+/// =========== Backend threads =================
+
+typedef struct network_interface {
+    network_conn_t *conn;
+    CQueue(u8_arr_promise) *send_queue;
+    CQueue(u8_arr_promise) *recv_queue;
+} network_interface_t;
+
+network_interface_t *init_network_interface(const net_conn_conf_t *conf, bool is_server);
+

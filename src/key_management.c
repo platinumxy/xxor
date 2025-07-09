@@ -9,7 +9,7 @@
 #include "debugging.h"
 #include "types.h"
 
-xxor_instance_t *load_file(const char *path) {
+xxor_instance_t *load_file(char *path) {
     FILE *file = fopen(path, "rb+");
     if (!file) {
         show_err("Failed to open file\n");
@@ -49,7 +49,7 @@ bool validate_instance(const xxor_instance_t *instance) {
     return true;
 }
 
-xxor_instance_t *unsafe_load_file(FILE *file, const char *path) {
+xxor_instance_t *unsafe_load_file(FILE *file, char *path) {
     xxor_meta_t *meta = calloc(1, METADATA_SIZE);
     fseek(file, 0, SEEK_SET);
     if (fread(meta, 1, METADATA_SIZE, file) != METADATA_SIZE) {

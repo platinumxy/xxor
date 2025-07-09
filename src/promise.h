@@ -4,6 +4,8 @@
 #include <stdlib.h>
 
 #include "utils.h"
+#include "circular_queue.h"
+#include "types.h"
 
 typedef enum {
     PROMISE_PENDING,
@@ -12,17 +14,17 @@ typedef enum {
 } promise_state_t;
 
 #define DECLARE_PROMISE_TYPE(T, name) \
-typedef struct promise_##name { \
+typedef __attribute__((unused)) struct promise_##name { \
     promise_state_t state; \
     T value; \
 } promise_##name##_t;\
 \
-static inline promise_##name##_t *new_##name##_promise() { \
+static __attribute__((unused)) inline promise_##name##_t *new_##name##_promise() { \
     promise_##name##_t* prms = calloc(1, sizeof(T));\
     prms->state = PROMISE_PENDING;\
     return prms;\
 }\
-static inline bool promise_##name##_resolve(promise_##name##_t *prms) { \
+static __attribute__((unused)) inline bool promise_##name##_resolve(promise_##name##_t *prms) { \
     while(prms->state == PROMISE_PENDING) { \
         sleep_ms(10);\
     }\
@@ -34,4 +36,6 @@ static inline bool promise_##name##_resolve(promise_##name##_t *prms) { \
 #define await_promise(name, prms) promise_##name##_resolve(prms)
 
 DECLARE_PROMISE_TYPE(int, int)
-DECLARE_PROMISE_TYPE(uint8_t*, u8_arr)
+DECLARE_QUEUE_TYPE(promise_t(int)*, int_promise)
+DECLARE_PROMISE_TYPE(u8_arr_t*, u8_arr)
+DECLARE_QUEUE_TYPE(promise_t(u8_arr)*, u8_arr_promise)

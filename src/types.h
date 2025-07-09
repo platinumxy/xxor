@@ -1,7 +1,7 @@
 #pragma once
 #include <stdio.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 
 static const uint8_t XOR_KEY_MAGIC[] = {0x58, 0x58, 0x4F, 0x52}; // "XXOR"
@@ -29,3 +29,8 @@ typedef struct xxor_instance {
 
 
 typedef bool (*fill_rand_buff_fn)(size_t, uint8_t *);
+
+typedef struct u8_arr {
+    uint8_t *data;
+    uint32_t size;
+} u8_arr_t;
